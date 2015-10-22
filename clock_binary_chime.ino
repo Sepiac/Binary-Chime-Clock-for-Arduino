@@ -26,6 +26,7 @@
 
 #define BACK_LIGHT_SWITCH 2
 #define SPEAKER_PIN 3
+#define ADAFRUIT_TAIL_PIN 4
 int backlightIsOn = 1;
 
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
@@ -75,6 +76,9 @@ void setup() {
   //set up the backlight button
   pinMode(BACK_LIGHT_SWITCH, INPUT);
 
+  //set up the power tail pin
+  pinMode(ADAFRUIT_TAIL_PIN, OUTPUT);
+
   pinMode(SPEAKER_PIN, OUTPUT);
 }
 
@@ -99,10 +103,13 @@ void loop() {
   printTemperature('f');
 
   //backlight setting using time
+  //also toggle the tail pin (turns a lamp off at night and back on in the morning)
   if((hour(currentTime) >= 1) && hour(currentTime) <= 7 ) {
     turnBacklightOff();
+    digitalWrite(ADAFRUIT_TAIL_PIN, LOW);
   } else {
     turnBacklightOn();
+    digitalWrite(ADAFRUIT_TAIL_PIN, HIGH);
   }
 
   //hour chime
