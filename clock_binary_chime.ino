@@ -253,7 +253,7 @@ void beepBinary(int value) {
   switch(value) {
     case 0:
       beep(150);
-      delay(250);
+      delay(500);
       break;
     case 1:
       beep(50);
