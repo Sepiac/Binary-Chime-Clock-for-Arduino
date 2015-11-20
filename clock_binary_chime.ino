@@ -27,12 +27,15 @@
 #define BACK_LIGHT_SWITCH 2
 #define SPEAKER_PIN 3
 #define ADAFRUIT_TAIL_PIN 4
+#define TAIL_OVERRIDE_PIN 5
+#define CHIME_TOGGLE_PIN 6
 int backlightIsOn = 1;
 
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 
 #define AM_CHAR (char)0
 #define PM_CHAR (char)1
+#define CHIME_CHAR (char)2
 
 //init custom characters
 byte amChar[8] = {
@@ -57,6 +60,17 @@ byte pmChar[8] = {
   0b10001
 };
 
+byte chimeChar[8] = {
+  0b00000,
+  0b00100,
+  0b01010,
+  0b01010,
+  0b01010,
+  0b11111,
+  0b00100,
+  0b00000
+};
+
 //end init custom characters
 
 void setup() {
@@ -72,12 +86,19 @@ void setup() {
   //init custom caracters
   lcd.createChar(0, amChar);
   lcd.createChar(1, pmChar);
+  lcd.createChar(2, chimeChar);
 
   //set up the backlight button
   pinMode(BACK_LIGHT_SWITCH, INPUT);
 
   //set up the power tail pin
   pinMode(ADAFRUIT_TAIL_PIN, OUTPUT);
+
+  //set up the power tail override pin
+  pinMode(TAIL_OVERRIDE_PIN, OUTPUT);
+
+  //set up the chime toggle pin
+  pinMode(CHIME_TOGGLE_PIN, INPUT);
 
   pinMode(SPEAKER_PIN, OUTPUT);
 }
@@ -104,7 +125,7 @@ void loop() {
 
   //backlight setting using time
   //also toggle the tail pin (turns a lamp off at night and back on in the morning)
-  if((hour(currentTime) >= 1) && hour(currentTime) <= 7 ) {
+  if((hour(currentTime) >= 1) && hour(currentTime) <= 7 && !digitalRead(TAIL_OVERRIDE_PIN)) {
     turnBacklightOff();
     digitalWrite(ADAFRUIT_TAIL_PIN, LOW);
   } else {
@@ -113,12 +134,20 @@ void loop() {
   }
 
   //hour chime
-  if(minute(currentTime) == 0 && second(currentTime) == 0) {
-    soundHoursInBinary(hourFormat12(currentTime));
+  if(digitalRead(CHIME_TOGGLE_PIN)) {
+    printChimeChar();
+    if(minute(currentTime) == 0 && second(currentTime) == 0) {
+      soundHoursInBinary(hourFormat12(currentTime));
+    }
   }
 
 
   delay(1000);
+}
+
+void printChimeChar() {
+  lcd.setCursor(15, 1);
+  lcd << CHIME_CHAR;
 }
 
 void setBacklightBySwitch() {
