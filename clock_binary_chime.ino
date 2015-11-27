@@ -252,7 +252,7 @@ void soundHoursInBinary(int hour) {
 void beepBinary(int value) {
   switch(value) {
     case 0:
-      beep(150);
+      beep(300);
       delay(250);
       break;
     case 1:
